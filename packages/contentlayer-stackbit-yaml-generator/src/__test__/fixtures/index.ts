@@ -1,5 +1,5 @@
 import { provideJaegerTracing } from '@contentlayer/utils'
-import { pipe, provideConsole, T } from '@contentlayer/utils/effect'
+import { O, pipe, provideConsole, S, T } from '@contentlayer/utils/effect'
 import type { DocumentType } from 'contentlayer/source-files'
 import { makeSource } from 'contentlayer/source-files'
 
@@ -14,7 +14,7 @@ const esbuildHash = 'not-important-for-this-test'
 const makeSchema = (documentTypes: Record<string, DocumentType<any>>) =>
   pipe(
     T.tryPromise(() => makeSource({ documentTypes, contentDirPath: '' })(undefined)),
-    T.chain((source) => source.provideSchema(esbuildHash)),
+    T.chain((source) => pipe(source.provideSchema(esbuildHash), S.runHead, T.map(O.getUnsafe))),
     provideJaegerTracing('contentlayer-cli'),
     provideConsole,
     T.runPromise,

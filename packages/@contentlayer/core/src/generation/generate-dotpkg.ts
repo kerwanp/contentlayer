@@ -1,7 +1,7 @@
 import type { AbsolutePosixFilePath, RelativePosixFilePath } from '@contentlayer/utils'
 import { filePathJoin, fs, relative } from '@contentlayer/utils'
 import type { E, HasClock, HasConsole } from '@contentlayer/utils/effect'
-import { Array, Chunk, flow, OT, pipe, S, T } from '@contentlayer/utils/effect'
+import { Array, Chunk, flow, OT, pipe, S, T, Tp } from '@contentlayer/utils/effect'
 import type { GetContentlayerVersionError } from '@contentlayer/utils/node'
 import { getContentlayerVersion } from '@contentlayer/utils/node'
 import { camelCase } from 'camel-case'
@@ -82,12 +82,18 @@ export const generateDotpkgStream = ({
 > => {
   const writtenFilesCache = {}
   const generationOptions = { sourcePluginType: config.source.type, options: config.source.options }
-  const resolveParams = pipe(
-    T.structPar({
-      schemaDef: config.source.provideSchema(config.esbuildHash),
-      targetPath: ArtifactsDir.mkdir,
-    }),
-    T.either,
+
+  const provideSchema = pipe(
+    config.source.provideSchema(config.esbuildHash),
+    S.mapEffect((schemaDef) =>
+      pipe(
+        T.structPar({
+          schemaDef: T.succeed(schemaDef),
+          targetPath: ArtifactsDir.mkdir,
+        }),
+      ),
+    ),
+    S.either,
   )
 
   // .pipe(
@@ -95,7 +101,7 @@ export const generateDotpkgStream = ({
   // ),
 
   return pipe(
-    S.fromEffect(resolveParams),
+    provideSchema,
     S.chainMapEitherRight(({ schemaDef, targetPath }) =>
       pipe(
         config.source.fetchData({ schemaDef, verbose }),

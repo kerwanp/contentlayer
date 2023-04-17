@@ -1,6 +1,6 @@
 import type * as core from '@contentlayer/core'
 import { processArgs } from '@contentlayer/core'
-import { pipe, S, T } from '@contentlayer/utils/effect'
+import { pipe, S, SC, T } from '@contentlayer/utils/effect'
 import { NotionRenderer } from '@notion-render/client'
 import * as notion from '@notionhq/client'
 
@@ -41,9 +41,14 @@ export const makeSource: core.MakeSourcePlugin<PluginOptions & core.PartialArgs>
     options,
     provideSchema: () =>
       pipe(
-        provideSchema({ databaseTypeDefs, options }),
-        T.provideService(NotionClient)(client),
-        T.provideService(NotionRendererTag)(renderer),
+        S.fromEffect(
+          pipe(
+            provideSchema({ databaseTypeDefs, options }),
+            T.provideService(NotionClient)(client),
+            T.provideService(NotionRendererTag)(renderer),
+          ),
+        ),
+        S.repeatSchedule(SC.spaced(5_000)),
       ),
     fetchData: ({ schemaDef }) =>
       pipe(

@@ -1,6 +1,6 @@
 import { renderTypes } from '@contentlayer/core'
 import { provideJaegerTracing } from '@contentlayer/utils'
-import { pipe, provideConsole, T } from '@contentlayer/utils/effect'
+import { O, pipe, provideConsole, S, T } from '@contentlayer/utils/effect'
 import { expect, test } from 'vitest'
 
 import type { DocumentTypes } from '../../index.js'
@@ -11,7 +11,7 @@ const renderTypeSource = async (documentTypes: DocumentTypes) => {
   const esbuildHash = 'not-important-for-this-test'
   const schemaDef = await pipe(
     T.tryPromise(() => makeSource({ documentTypes, contentDirPath: '' })(undefined)),
-    T.chain((source) => source.provideSchema(esbuildHash)),
+    T.chain((source) => pipe(source.provideSchema(esbuildHash), S.runHead, T.map(O.getUnsafe))),
     provideJaegerTracing('contentlayer-cli'),
     provideConsole,
     T.runPromise,

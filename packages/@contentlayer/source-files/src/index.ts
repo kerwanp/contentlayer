@@ -99,9 +99,11 @@ export const makeSource: core.MakeSourcePlugin<Args> = (args) => async (sourceKe
     extensions: extensions ?? {},
     options,
     provideSchema: (esbuildHash) =>
-      pipe(
-        makeCoreSchema({ documentTypeDefs, options, esbuildHash }),
-        T.mapError((error) => new SourceProvideSchemaError({ error })),
+      S.fromEffect(
+        pipe(
+          makeCoreSchema({ documentTypeDefs, options, esbuildHash }),
+          T.mapError((error) => new SourceProvideSchemaError({ error })),
+        ),
       ),
     fetchData: ({ schemaDef, verbose, skipCachePersistence }) =>
       pipe(
