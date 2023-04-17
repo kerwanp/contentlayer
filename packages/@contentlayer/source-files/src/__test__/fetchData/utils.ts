@@ -8,7 +8,7 @@ import {
   unknownToRelativePosixFilePath,
 } from '@contentlayer/utils'
 import type { HasClock, HasConsole, OT } from '@contentlayer/utils/effect'
-import { pipe, provideTestConsole, T, These } from '@contentlayer/utils/effect'
+import { O, pipe, provideTestConsole, S, T, These } from '@contentlayer/utils/effect'
 import { NodeFsLive } from '@contentlayer/utils/node'
 
 import type { HasDocumentTypeMapState } from '../../fetchData/DocumentTypeMap.js'
@@ -33,7 +33,7 @@ export const runTest = async ({
     const esbuildHash = 'not-important-for-this-test'
 
     const source = yield* $(T.tryPromise(() => makeSource({ contentDirPath, documentTypes })(undefined)))
-    const coreSchemaDef = yield* $(source.provideSchema(esbuildHash))
+    const coreSchemaDef = yield* $(pipe(source.provideSchema(esbuildHash), S.runHead, T.map(O.getUnsafe)))
 
     const documentTypeDefs = (Array.isArray(documentTypes) ? documentTypes : Object.values(documentTypes)).map((_) =>
       _.def(),

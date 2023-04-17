@@ -1,8 +1,9 @@
 import * as path from 'node:path'
+import { config } from 'node:process'
 
 import * as core from '@contentlayer/core'
 import { fs } from '@contentlayer/utils'
-import { OT, pipe, T } from '@contentlayer/utils/effect'
+import { O, OT, pipe, S, T } from '@contentlayer/utils/effect'
 
 import { BaseCommand } from './_BaseCommand.js'
 
@@ -60,7 +61,7 @@ const generateTypes = ({
     }
 
     const { source, esbuildHash } = sourceEither.right
-    const schemaDef = yield* $(source.provideSchema(esbuildHash))
+    const schemaDef = yield* $(pipe(source.provideSchema(esbuildHash), S.runHead, T.map(O.getUnsafe)))
 
     if (!indexDtsFileExists) {
       const options = source.options

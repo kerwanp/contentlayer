@@ -121,7 +121,7 @@ export type SourcePlugin = {
 
 export type ProvideSchema = (
   esbuildHash: string,
-) => T.Effect<OT.HasTracer & HasConsole, SourceProvideSchemaError, SchemaDef>
+) => S.Stream<OT.HasTracer & HasClock & HasConsole, SourceProvideSchemaError, SchemaDef>
 export type FetchData = (_: {
   schemaDef: SchemaDef
   verbose: boolean

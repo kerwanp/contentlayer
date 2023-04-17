@@ -5,8 +5,8 @@ import type { HasCwd } from '@contentlayer/core'
 import { getConfig, provideCwd } from '@contentlayer/core'
 import type { fs } from '@contentlayer/utils'
 import { provideJaegerTracing, recRemoveUndefinedValues } from '@contentlayer/utils'
-import type { HasConsole } from '@contentlayer/utils/effect'
-import { OT, pipe, pretty, provideConsole, T } from '@contentlayer/utils/effect'
+import type { HasClock, HasConsole } from '@contentlayer/utils/effect'
+import { O, OT, pipe, pretty, provideConsole, S, T } from '@contentlayer/utils/effect'
 import { NodeFsLive } from '@contentlayer/utils/node'
 import { Command, Option } from 'clipanion'
 import * as t from 'typanion'
@@ -53,11 +53,14 @@ export class DefaultCommand extends Command {
     }
   }
 
-  executeSafe = (): T.Effect<OT.HasTracer & HasCwd & HasConsole & fs.HasFs, unknown, void> =>
+  executeSafe = (): T.Effect<OT.HasTracer & HasCwd & HasConsole & HasClock & fs.HasFs, unknown, void> =>
     pipe(
       getConfig({ configPath: this.configPath }),
       T.chain((config) =>
-        T.struct({ source: T.succeed(config.source), schema: config.source.provideSchema(config.esbuildHash) }),
+        T.struct({
+          source: T.succeed(config.source),
+          schema: pipe(config.source.provideSchema(config.esbuildHash), S.runHead, T.map(O.getUnsafe)),
+        }),
       ),
       T.chain(({ schema, source }) =>
         T.tryCatchPromise(

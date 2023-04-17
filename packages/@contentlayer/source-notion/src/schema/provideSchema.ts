@@ -14,6 +14,7 @@ export type ProvideSchemaArgs = {
 export const provideSchema = ({ databaseTypeDefs, options }: ProvideSchemaArgs) =>
   pipe(
     T.gen(function* ($) {
+      console.log('Providing schema')
       return {
         documentTypeDefMap: yield* $(provideDocumentTypeDefMap({ databaseTypeDefs, options })),
         nestedTypeDefMap: yield* $(provideNestedTypeDefMap()),
@@ -29,7 +30,10 @@ export const provideSchema = ({ databaseTypeDefs, options }: ProvideSchemaArgs) 
             hash,
           }),
         ),
-        T.tap((schemaDef) => T.succeed(core.validateSchema(schemaDef))),
+        T.tap((schemaDef) => {
+          console.log(schemaDef.hash)
+          return T.succeed(core.validateSchema(schemaDef))
+        }),
       ),
     ),
 

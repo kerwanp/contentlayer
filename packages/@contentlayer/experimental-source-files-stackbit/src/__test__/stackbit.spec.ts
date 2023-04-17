@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import * as SourceFiles from '@contentlayer/source-files'
 import { provideDummyTracing } from '@contentlayer/utils'
 import type { HasClock, HasConsole, OT } from '@contentlayer/utils/effect'
-import { pipe, provideTestConsole, T } from '@contentlayer/utils/effect'
+import { O, pipe, provideTestConsole, S, T } from '@contentlayer/utils/effect'
 import * as Stackbit from '@stackbit/sdk'
 import { expect, test } from 'vitest'
 
@@ -36,7 +36,7 @@ const schemaFromFixture = (fixtureName: string) => async () => {
   const documentTypes = stackbitConfigToDocumentTypes(configResult.config!)
 
   const contentlayerSource = await SourceFiles.makeSource({ contentDirPath: NOT_USED_STR, documentTypes })(undefined)
-  const schema = await runMain(contentlayerSource.provideSchema(NOT_USED_STR))
+  const schema = await runMain(pipe(contentlayerSource.provideSchema(NOT_USED_STR), S.runHead, T.map(O.getUnsafe)))
 
   return schema.result
 }

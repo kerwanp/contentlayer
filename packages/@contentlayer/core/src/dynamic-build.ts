@@ -99,7 +99,7 @@ export const dynamicBuild = ({ config, verbose }: { config: Config; verbose: boo
   pipe(
     T.gen(function* ($) {
       // TODO try to do this as generation-time in the future and come up with a serialization strategy for the `schemaDef`
-      const schemaDef = yield* $(config.source.provideSchema(config.esbuildHash))
+      const schemaDef = yield* $(pipe(config.source.provideSchema(config.esbuildHash), S.runHead, T.map(O.getUnsafe)))
 
       const cache = yield* $(
         pipe(
