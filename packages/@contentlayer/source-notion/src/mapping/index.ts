@@ -90,20 +90,29 @@ const FieldMapping: FieldMappingType = {
   formula: fieldFormula,
   relation: fieldRelation,
   rollup: fieldRollup,
+  unique_id: fieldString,
 }
 
 export const getFieldDef = <T extends DatabasePropertyTypes>(
   args: { property: DatabaseProperties } & Omit<GetFieldDefArgs<T>, 'propertyData'>,
 ) =>
-  FieldMapping[args.property.type].getFieldDef({
-    propertyData: getDatabasePropertyData(args.property),
-    ...args,
-  })
+  {
+    const mapping = FieldMapping[args.property.type]
+    if(!mapping) throw new Error(`No mapping for property type ${args.property.type}`)
+    return mapping.getFieldDef({
+      propertyData: getDatabasePropertyData(args.property),
+      ...args,
+    })
+  }
 
 export const getFieldData = <T extends PagePropertyTypes>(
   args: { property: PageProperties } & Omit<GetFieldDataArgs<T>, 'propertyData'>,
 ) =>
-  FieldMapping[args.property.type].getFieldData({
+{
+  const mapping = FieldMapping[args.property.type]
+  if(!mapping) throw new Error(`No mapping for property type ${args.property.type}`)
+  return mapping.getFieldData({
     propertyData: getPagePropertyData(args.property),
     ...args,
   })
+}
